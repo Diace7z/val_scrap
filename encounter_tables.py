@@ -82,7 +82,7 @@ def encounter(df ,rename, eps = 'V25A2'):
     df1 = random.sample([str(x).replace('#','%23') if '#' in str(x) else str(x) for x in df ], len(df))
     #print(df1)
     
-    
+    count = 0
     for ID in df1:
         try:
             link = f'https://tracker.gg/valorant/profile/riot/{ID}/encounters?platform=pc&playlist=competitive&season={ep}'
@@ -93,10 +93,10 @@ def encounter(df ,rename, eps = 'V25A2'):
                     #//*[@id="app"]/div[2]/div[3]/div/main/div[4]    /div/div[2]/div[3]/div/div[2]
             try: 
                 driver.find_element(By.XPATH, value = path).text
-                print('div = 3')
+                #print('div = 3')
             except:
                 n_m = 4
-                print('div = 4')
+                #print('div = 4')
             
             #Find table element, row, and table data
             table = driver.find_element(By.TAG_NAME, 'tbody')
@@ -116,12 +116,11 @@ def encounter(df ,rename, eps = 'V25A2'):
             df.columns = ['id','encounters','rank','wr','kd','match','date']
             new_ID = []
             for ID in df['id']:
-                ID = ID.replace('\n#','%23')
+                ID = str(ID).replace('\n#','%23')
                 new_ID.append(ID)
             df['id'] = new_ID
                 #drop duplicate row by id
             df = df.drop_duplicates(subset='id')
-            display(df.tail(10))
             df.to_csv(rename + '.csv', index = False)
             
         except Exception as e:
@@ -159,12 +158,12 @@ def encounter(df ,rename, eps = 'V25A2'):
             df.columns = ['id','encounters','rank','wr','kd','match','date']
             new_ID = []
             for ID in df['id']:
-                ID = ID.replace('\n#','%23')
+                ID = str(ID).replace('\n#','%23')
                 new_ID.append(ID)
             df['id'] = new_ID
                 #drop duplicate row by id
             df = df.drop_duplicates(subset='id')
-            display(df.tail(10))
+            print("Total ID collected:",len(df))
             df.to_csv(rename + '.csv')
             
         except Exception as e:
@@ -174,7 +173,7 @@ def encounter(df ,rename, eps = 'V25A2'):
             print("Data not found")
         
         try:
-            path_3 = '//*[@id="app"]/div[2]/div[3]/div/main/div[3]/div/h1'
+            path_3 = f'//*[@id="app"]/div[2]/div[3]/div/main/div[{n_m}]/div/h1'
             driver.find_element(By.XPATH, path_3)           
             disable_warp()
             human_delay(15,30)
@@ -191,7 +190,11 @@ def encounter(df ,rename, eps = 'V25A2'):
             human_delay(15,30)
         except:
             None
-        clear_output(wait=True)
+        if count%10 == 0:
+            clear_output(wait=True)
+        count += 1
+        #print(type(tabel))
+        tabel = random.sample(tabel,len(tabel))
     driver.quit()
     
     #Change  ID format to subtitutable to link

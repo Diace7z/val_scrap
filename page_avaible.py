@@ -7,6 +7,10 @@ import subprocess
 
 # List of proxies
 
+def human_delay(min_time=1.5, max_time=4):
+    delay = random.uniform(min_time, max_time)
+    time.sleep(delay)
+
 
 def disable_warp():
     try:
@@ -38,24 +42,32 @@ def div_n(driver):
         n_m = 4
     return n_m
 
-def page_available(link, driver):
+def page_available(link, driver,main = 'yes'):
+    try:
+        driver
+        print("Driver is defined.")
+    except:
+        driver = uc.Chrome(headless=False,use_subprocess=True)
+        driver.maximize_window()
     #Condition:
     #"0" : Available 
     #"1" : Not Available
     #"2" : Bot Detected
     #"3" : Error Pages, switch IP
     n = 3
-    condition = 2
+    condition = 3
     text = 'Error_3'
+    warp_counter = 0
     while condition > 1:
         try:
             driver.get(link)
             time.sleep(7)
         except:
+            driver.quit()
             driver = uc.Chrome(headless=False,use_subprocess=True)
             driver.maximize_window()
+            time.sleep(60)
             driver.get(link)
-            time.sleep(7)
 
         n = div_n(driver)
         print(n)
@@ -72,6 +84,15 @@ def page_available(link, driver):
         except Exception as e:
             #print(e)
             None
+
+        if main == 'yes':
+            ping = 0
+            min_time, max_time = 0,30
+        else:
+            ping = 10
+            min_time, max_time = 30,60
+        
+        
         if condition != 0 :
             try:
                 response = driver.find_element(By.XPATH, value = path_1_1)
@@ -88,21 +109,38 @@ def page_available(link, driver):
                 else:
                     condition = 2
                     print('something error')
+
+                if warp_counter > ping:
+                    disable_warp()
+                else:
+                    None
+                    
+                if condition > 1:
+                    print('Programs will start in 0.5 minutes')
+                    human_delay(min_time,max_time)
+                    if condition > 2:
+                        print("Error/Not blocked") 
+                        driver.quit()
+                        driver = uc.Chrome(headless=False,use_subprocess=True)
+                        driver.maximize_window()
+                        driver.get(link)
+                        warp_counter +=1
+                    else:
+                        print('Access denied')
+                        driver.quit()
+                        driver = uc.Chrome(headless=False,use_subprocess=True)
+                        driver.maximize_window()
+                        driver.get(link)
+                        warp_counter +=1
+            
             except Exception as e:
-                #print(e)
-                None
+                human_delay(10,20)
+                drive.quit()
             #
-        error_count = 0
-        if condition > 1:
-            print('Programs will start in 0.5 minutes')
-            disable_warp()
-            time.sleep(30)
-            if error_count >2:
-                print("driver has been error for 3 times") 
-                driver.refresh()
-            else:
-                driver.refresh()
+        
+
         else:
             print("Page accessable")
+    
     return driver
 
